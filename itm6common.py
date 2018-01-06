@@ -10,6 +10,8 @@ searchNofile = '.*Nofile\sLimit:\s'
 searchChome = '.*ITM\sHome:\s'
 searchKbbras1 = '.*KBB_RAS1:\s'
 searchipaddr = '\d:\ssource=.*'
+searchPort = '.*KDEBP_AssignPort.*'
+searchMsindex = '.*listening:.*'
 
 # BSS1_GetEnv Variables
 searchDynamic = 'BSS1_GetEnv.*KBBRA_ChangeLogging'
@@ -18,7 +20,7 @@ searchCms = 'BSS1_GetEnv.*CMSLIST=".*'
 
 
 def itmhost(raslog):
-
+    print("\n#######################################################")
     with open(raslog, 'r') as reviewraslog:
         itmemptylist = []
         for my_line in reviewraslog:
@@ -32,7 +34,7 @@ def itmhost(raslog):
         else:
             itmout = itmemptylist.pop()
             itmout = re.sub('\n', '', itmout)
-            print("debug: ", itmout)
+            print("Hostname, Operating System, Start Date/Time: ", itmout)
 
 
 def itmtype(raslog):
@@ -134,7 +136,8 @@ def itmChome(raslog):
         else:
             itmout = itmemptylist.pop()
             itmout = re.sub('\n', '', itmout)
-            print("debug: ", itmout)
+            print("CANDLEHOME: ", itmout)
+    print("#######################################################\n")
 
 
 def itmKbbras1(raslog):
@@ -154,6 +157,7 @@ def itmKbbras1(raslog):
             itmout = re.sub('\n', '', itmout)
             print("Debug Setting (KBB_RAS): ", itmout)
 
+
 def itmdynamic(raslog):
     with open(raslog, 'r') as reviewraslog:
         itmemptylist = []
@@ -168,10 +172,11 @@ def itmdynamic(raslog):
         else:
             itmout = itmemptylist.pop()
             itmout = re.sub('\n', '', itmout)
-    print("#######################################################\n")
+    print("#######################################################")
 
 
 def itmIpaddr(raslog):
+    print("#######################################################")
     with open(raslog, 'r') as reviewraslog:
         itmemptylist = []
         for my_line in reviewraslog:
@@ -183,6 +188,7 @@ def itmIpaddr(raslog):
         if a <= 0:
             print("Network Interfaces NOT FOUND")
         else:
+            print("Network Information:")
             for nic in itmemptylist:
                 nic = re.sub('\n', '', nic)
                 print("Network Interface Card:", nic)
@@ -198,11 +204,29 @@ def itmprotocol(raslog):
                 pass
         a = len(itmemptylist)
         if a <= 0:
-            print("KDC_FAMILIES NOT FOUND")
+            print("\nKDC_FAMILIES NOT FOUND")
         else:
             itmout = itmemptylist.pop()
             itmout = re.sub('\n', '', itmout)
-            print("debug: ", itmout)
+            print("\nKDC_FAMILIES setting:", itmout)
+
+
+def itmPort(raslog):
+    with open(raslog, 'r') as reviewraslog:
+        itmemptylist = []
+        for my_line in reviewraslog:
+            if re.search(searchPort, my_line):
+                itmemptylist.append(my_line)
+            else:
+                pass
+        a = len(itmemptylist)
+        if a <= 0:
+            print("Agent's Port Assignment NOT FOUND")
+        else:
+            itmout = itmemptylist.pop()
+            itmout = re.sub('\n', '', itmout)
+            print("\nPort Agent is connected to (KDEBP_AssignPort):\n", itmout)
+
 
 def itmcms(raslog):
     with open(raslog, 'r') as reviewraslog:
@@ -219,3 +243,20 @@ def itmcms(raslog):
             itmout = itmemptylist.pop()
             itmout = re.sub('\n', '', itmout)
             print("debug: ", itmout)
+
+def itmMsindex(raslog):
+    with open(raslog, 'r') as reviewraslog:
+        itmemptylist = []
+        for my_line in reviewraslog:
+            if re.search(searchMsindex, my_line):
+                itmemptylist.append(my_line)
+            else:
+                pass
+        a = len(itmemptylist)
+        if a <= 0:
+            print("\nMonitoring Agent registration with Monitoring Service Index NOT FOUND")
+        else:
+            print ("\nAgent Registered with Monitoring Service Index Using Port (add_listener):\n")
+            for ms_port in itmemptylist:
+                ms_port = re.sub('\n', '', ms_port)
+                print(ms_port)

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import re
 
 searchHost = '.*System\sName:\s'
@@ -18,6 +19,8 @@ searchDynamic = 'BSS1_GetEnv.*KBBRA_ChangeLogging'
 searchprotocol = 'BSS1_GetEnv.*KDC_FAMILIES='
 searchCms = 'BSS1_GetEnv.*CMSLIST=".*'
 
+# Header Functions
+
 
 def itmhost(raslog):
     print("\n#######################################################")
@@ -32,9 +35,10 @@ def itmhost(raslog):
         if a <= 0:
             print("Hostname NOT FOUND")
         else:
-            itmout = itmemptylist.pop()
-            itmout = re.sub('\n', '', itmout)
-            print("Hostname, Operating System, Start Date/Time: ", itmout)
+            itmout = itmemptylist.pop(0)
+            itmout = re.sub('^.*Name:', '', itmout)
+            itmout = re.sub('Process\sID.*$\n', '', itmout)
+            print("Hostname, System Type, Start Date/Time Process Info:\n", "HOSTNAME: ", itmout)
 
 
 def itmtype(raslog):
@@ -49,9 +53,10 @@ def itmtype(raslog):
         if a <= 0:
             print("System Type: NOT FOUND")
         else:
-            itmout = itmemptylist.pop()
+            itmout = itmemptylist.pop(0)
+            itmout = re.sub('^.*Type:', '', itmout)
             itmout = re.sub('\n', '', itmout)
-            print("debug: ", itmout)
+            print("System Type: ", itmout)
 
 
 def itmSdate(raslog):
@@ -66,9 +71,10 @@ def itmSdate(raslog):
         if a <=0:
             print("Start Date NOT FOUND")
         else:
-            itmout = itmemptylist.pop()
-            itmout = re.sub('\n', '', itmout)
-            print("debug: ", itmout)
+            itmout = itmemptylist.pop(0)
+            itmout = re.sub('^.*Date:', '', itmout)
+            itmout = re.sub(r'St.*\n', '', itmout)
+            print("Start Date: ", itmout)
 
 
 def itmStime(raslog):
@@ -83,9 +89,10 @@ def itmStime(raslog):
         if a <= 0:
             print("Start Time NOT FOUND")
         else:
-            itmout = itmemptylist.pop()
+            itmout = itmemptylist.pop(0)
             itmout = re.sub('\n', '', itmout)
-            print("debug: ", itmout)
+            itmout = re.sub('^.*Time:', '', itmout)
+            print("Start Time: ", itmout)
 
 
 def itmPid(raslog):
@@ -100,9 +107,10 @@ def itmPid(raslog):
         if a <= 0:
             print("Process ID NOT FOUND")
         else:
-            itmout = itmemptylist.pop()
+            itmout = itmemptylist.pop(0)
             itmout = re.sub('\n', '', itmout)
-            print("debug: ", itmout)
+            itmout = re.sub('^.*\s+Process\sID:', '', itmout)
+            print("Process ID: ", itmout)
 
 
 def itmUser(raslog):
@@ -117,9 +125,10 @@ def itmUser(raslog):
         if a <= 0:
             print("Userid NOT FOUND")
         else:
-            itmout = itmemptylist.pop()
+            itmout = itmemptylist.pop(0)
             itmout = re.sub('\n', '', itmout)
-            print("debug: ", itmout)
+            itmout = re.sub('^.*\s+User\sName:', '', itmout)
+            print("UserID: ", itmout)
 
 
 def itmChome(raslog):
@@ -134,10 +143,13 @@ def itmChome(raslog):
         if a <= 0:
             print("CANDLEHOME NOT FOUND")
         else:
-            itmout = itmemptylist.pop()
+            itmout = itmemptylist.pop(0)
             itmout = re.sub('\n', '', itmout)
+            itmout = re.sub('^.*ITM\sHome:\s', '', itmout)
+            itmout = re.sub('ITM\sProcess:.*', '', itmout)
             print("CANDLEHOME: ", itmout)
     print("#######################################################\n")
+# End of Header Functions
 
 
 def itmKbbras1(raslog):
@@ -153,9 +165,10 @@ def itmKbbras1(raslog):
         if a <= 0:
             print ("KBB_RAS1 trace setting NOT FOUND")
         else:
-            itmout = itmemptylist.pop()
-            itmout = re.sub('\n', '', itmout)
-            print("Debug Setting (KBB_RAS): ", itmout)
+            itmout = itmemptylist.pop(0)
+            itmout = re.sub('^.*RAS1:', '', itmout)
+            itmout = re.sub(r'\n', '', itmout)
+            print("Debug Setting (KBB_RAS):", itmout)
 
 
 def itmdynamic(raslog):
@@ -170,7 +183,7 @@ def itmdynamic(raslog):
         if a <= 0:
             print ("Dynamic debug trace not set")
         else:
-            itmout = itmemptylist.pop()
+            itmout = itmemptylist.pop(0)
             itmout = re.sub('\n', '', itmout)
     print("#######################################################")
 
@@ -189,9 +202,12 @@ def itmIpaddr(raslog):
             print("Network Interfaces NOT FOUND")
         else:
             print("Network Information:")
-            for nic in itmemptylist:
-                nic = re.sub('\n', '', nic)
-                print("Network Interface Card:", nic)
+            nic = 1
+            for itmout in itmemptylist:
+                itmout = re.sub('\n', '', itmout)
+                itmout = re.sub('^.*\d+\s+', '', itmout)
+                print("Network Interface Card["+ str(nic)+ "]:", itmout)
+                nic += 1
 
 
 def itmprotocol(raslog):
@@ -206,9 +222,10 @@ def itmprotocol(raslog):
         if a <= 0:
             print("\nKDC_FAMILIES NOT FOUND")
         else:
-            itmout = itmemptylist.pop()
-            itmout = re.sub('\n', '', itmout)
-            print("\nKDC_FAMILIES setting:", itmout)
+            itmout = itmemptylist.pop(0)
+            itmout = re.sub('"\n', '', itmout)
+            itmout = re.sub('\(.*\).*="', '', itmout)
+            print("\nKDC_FAMILIES Network Protocol Setting:\n", itmout)
 
 
 def itmPort(raslog):
@@ -223,9 +240,10 @@ def itmPort(raslog):
         if a <= 0:
             print("Agent's Port Assignment NOT FOUND")
         else:
-            itmout = itmemptylist.pop()
+            itmout = itmemptylist.pop(0)
             itmout = re.sub('\n', '', itmout)
-            print("\nPort Agent is connected to (KDEBP_AssignPort):\n", itmout)
+            itmout = re.sub('^.*AssignPort"\)', '', itmout)
+            print("\nAgent is bound to Port (KDEBP_AssignPort):\n", itmout)
 
 
 def itmcms(raslog):
@@ -238,11 +256,12 @@ def itmcms(raslog):
                 pass
         a = len(itmemptylist)
         if a <= 0:
-            print("TEMS connection NOT FOUND")
+            print("TEMS Connection NOT FOUND")
         else:
-            itmout = itmemptylist.pop()
+            itmout = itmemptylist.pop(0)
             itmout = re.sub('\n', '', itmout)
-            print("debug: ", itmout)
+            itmout = re.sub('\(.*\).*="', '', itmout)
+            print("\nAgent configured to connect to TEMS: ", itmout)
 
 def itmMsindex(raslog):
     with open(raslog, 'r') as reviewraslog:
@@ -256,7 +275,8 @@ def itmMsindex(raslog):
         if a <= 0:
             print("\nMonitoring Agent registration with Monitoring Service Index NOT FOUND")
         else:
-            print ("\nAgent Registered with Monitoring Service Index Using Port (add_listener):\n")
-            for ms_port in itmemptylist:
-                ms_port = re.sub('\n', '', ms_port)
-                print(ms_port)
+            print ("\nAgent Registered with Monitoring Service Index Using Port (add_listener):")
+            for itmout in itmemptylist:
+                itmout = re.sub('\n', '', itmout)
+                itmout = re.sub('\(.*\)', '', itmout)
+                print(itmout)

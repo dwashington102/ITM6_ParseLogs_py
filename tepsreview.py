@@ -1,8 +1,9 @@
+from __future__ import print_function
 import os
 import re
 import itm6common
 
-cq_raslog = r"/home/washingd/Desktop/Temp/apptuv0018_cq_KfwServices_5a1da33c-01.log"
+cq_raslog = r"/home/washingd/Desktop/Temp/myteps_cq_KfwServices_5a1da33c-01.log"
 
 #TEPS config searches
 searchKfwdsn = '.*\sKFW_DSN='
@@ -17,7 +18,7 @@ cqonline  = '.*Waiting\sfor\srequests.*'
 def display_menu():
     os.system('clear')
     print("#######################################################")
-    print("Logs reviewed: ", cq_raslog)
+    print("Logs reviewed:\n", cq_raslog)
     print("#######################################################")
 
 
@@ -37,7 +38,13 @@ def get_itm6common():
         itm6common.itmMsindex(cq_raslog)
         itm6common.itmcms(cq_raslog)
 
+
+#def get_itm6common():
+#    itm6search.itm6openf(cq_raslog)
+
 def get_tepsinfo():
+    print("\n#######################################################")
+    print("TEPS Configuration Information: ")
     teps_db()
     tepsonline()
     teps_ewas()
@@ -45,6 +52,7 @@ def get_tepsinfo():
     teps_jvm()
     teps_fips()
     teps_tdw()
+    print("#######################################################\n")
 
 
 def teps_db():
@@ -156,8 +164,9 @@ def tepsonline():
         for my_line in reviewras:
             for match in re.finditer(cqonline, my_line, re.S):
                 cqup_text = match.group()
-                #cqup_text = re.sub(r'\n', '', cqup_text)
-                tepsup_matchlist.append(cqup_text)
+                cqup_text = re.sub(r'\(.*\)', '', cqup_text)
+                #tepsup_matchlist.append(cqup_text)
+                #cqup_text = cqup_text.replace('(.*)', '')
                 print("debug tesponline: ", cqup_text)
 
 

@@ -1,0 +1,13 @@
+searchitmdebug="KBB_RAS1:"
+searchdynamicdebug="KBBRA_ChangeLogging"
+searchitmsystemname="System Name: "
+searchitmsystemtype="System Type: "
+searchitmstartdate="Start Date: "
+searchitmstarttime="Start Time: "
+searchitmcomponent="Component: "
+searchitmdriver="Driver: "
+searchusername=" User Name: "
+searchnofile=" Nofile Limit: "
+searchpid=" Process ID: "
+searchcandlehome=" CANDLEHOME=\""
+

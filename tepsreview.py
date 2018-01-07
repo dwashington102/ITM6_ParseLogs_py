@@ -1,9 +1,18 @@
+"""
+Testing my limited knowledge of Python to parse TEPS logs.
+It may not be pretty, but it's faster than digging through the logs to pull out settings.
+
+Also -> using global variables is bad and I am using them throughout so I'm bad to the bone!
+"""
+
 from __future__ import print_function
+from builtins import input
 import os
 import re
 import itm6common
+import datetime as DT
 
-cq_raslog = r"/home/washingd/Desktop/Temp/myteps_cq_KfwServices_5a1da33c-01.log"
+cq_raslog = input("Filename: ")
 
 #TEPS config searches
 searchKfwdsn = '.*\sKFW_DSN='
@@ -32,6 +41,7 @@ def get_itm6common():
         itm6common.itmUser(cq_raslog)
         itm6common.itmPid(cq_raslog)
         itm6common.itmChome(cq_raslog)
+        itm6common.itmnofile(cq_raslog)
         itm6common.itmIpaddr(cq_raslog)
         itm6common.itmprotocol(cq_raslog)
         itm6common.itmPort(cq_raslog)
@@ -45,8 +55,8 @@ def get_itm6common():
 def get_tepsinfo():
     print("\n#######################################################")
     print("TEPS Configuration Information: ")
-    teps_db()
     tepsonline()
+    teps_db()
     teps_ewas()
     teps_embed()
     teps_jvm()
@@ -57,6 +67,7 @@ def get_tepsinfo():
 
 def teps_db():
     with open(cq_raslog, 'r') as reviewras:
+        global itmemptylist
         itmemptylist = []
         for my_line in reviewras:
             if re.search(searchKfwdsn, my_line):
@@ -67,13 +78,16 @@ def teps_db():
         if a <= 0:
             print("\nTEPS Database Type: NOT FOUND")
         else:
-            itmout = itmemptylist.pop()
-            itmout = re.sub('\n', '', itmout)
-            print("\nTEPS Database Type (KFW_DSN): ", itmout, "\n")
+            bssenv(itmemptylist)
+            #itmout = itmemptylist.pop(0)
+            #itmout = re.sub('\n', '', itmout)
+            #itmout = re.sub('^.*GetEnv"\)\s', '', itmout)
+            #print("\nTEPS Database Type (KFW_DSN):\n", itmout, "\n")
 
 
 def teps_ewas():
     with open(cq_raslog, 'r') as reviewras:
+        global itmemptylist
         itmemptylist = []
         for my_line in reviewras:
             if re.search(searchEwas, my_line):
@@ -82,15 +96,18 @@ def teps_ewas():
                 pass
         a = len(itmemptylist)
         if a <= 0:
-            print("KFW_AUTHORIZATiON_USE_EWAS: NOT FOUND")
+            print("KFW_AUTHORIZATION_USE_EWAS: NOT FOUND")
         else:
-            itmout = itmemptylist.pop()
-            itmout = re.sub('\n', '', itmout)
-            print("KFW_AUTHORIZATION_USE_EWAS: ", itmout, "\n")
+            bssenv(itmemptylist)
+            #itmout = itmemptylist.pop(0)
+            #itmout = re.sub('\n', '', itmout)
+            #itmout = re.sub('^.*GetEnv"\)\s', '', itmout)
+            #print("KFW_AUTHORIZATION_USE_EWAS: ", itmout, "\n")
 
 
 def teps_embed():
     with open(cq_raslog, 'r') as reviewras:
+        global itmemptylist
         itmemptylist = []
         for my_line in reviewras:
             if re.search(searchEmbed, my_line):
@@ -101,13 +118,16 @@ def teps_embed():
         if a <= 0:
             print("KFW_USE_EMBEDDED: NOT FOUND")
         else:
-            itmout = itmemptylist.pop()
-            itmout = re.sub('\n', '', itmout)
-            print("KFW_USE_EMBEDDED=", itmout)
+            bssenv(itmemptylist)
+#            itmout = itmemptylist.pop(0)
+#            itmout = re.sub('\n', '', itmout)
+#            itmout = re.sub('^.*GetEnv"\)\s', '', itmout)
+#            print(itmout)
 
 
 def teps_jvm():
     with open(cq_raslog, 'r') as reviewras:
+        global itmemptylist
         itmemptylist = []
         for my_line in reviewras:
             if re.search(searchJvm, my_line):
@@ -118,13 +138,16 @@ def teps_jvm():
         if a <= 0:
             print ("KFW_STARTJVM: NOT FOUND")
         else:
-            itmout = itmemptylist.pop()
-            itmout = re.sub('\n', '', itmout)
-            print("KFW_STARTJVM=", itmout)
+            bssenv(itmemptylist)
+            #itmout = itmemptylist.pop(0)
+            #itmout = re.sub('\n', '', itmout)
+            #itmout = re.sub('^.*GetEnv"\)\s', '', itmout)
+            #print(itmout)
 
 
 def teps_fips():
     with open(cq_raslog, 'r') as reviewras:
+        global itmemptylist
         itmemptylist = []
         for my_line in reviewras:
             if re.search(searchFips, my_line):
@@ -135,9 +158,10 @@ def teps_fips():
         if a <= 0:
             print ("KFW_FIPS_ENFORCED: NOT FOUND")
         else:
-            itmout = itmemptylist.pop()
-            itmout = re.sub('\n', '', itmout)
-            print("KFW_FIPS_ENFORCED=", itmout)
+            bssenv(itmemptylist)
+            #itmout = itmemptylist.pop(0)
+            #itmout = re.sub('\n', '', itmout)
+            #print("KFW_FIPS_ENFORCED=", itmout)
 
 
 def teps_tdw():
@@ -152,23 +176,38 @@ def teps_tdw():
         if a <= 0:
             print ("KFW_FIPS_ENFORCED: NOT FOUND")
         else:
-            itmout = itmemptylist.pop()
+            itmout = itmemptylist.pop(0)
             itmout = re.sub('\n', '', itmout)
+            itmout = re.sub('^.*"\)\s', '', itmout)
             print("\nTEPS settings regarding connection to the Data Warehouse")
             print(itmout)
 
 
 def tepsonline():
-    tepsup_matchlist = []
+    itmemptylist = []
     with open(cq_raslog, 'r') as reviewras:
         for my_line in reviewras:
-            for match in re.finditer(cqonline, my_line, re.S):
-                cqup_text = match.group()
-                cqup_text = re.sub(r'\(.*\)', '', cqup_text)
-                #tepsup_matchlist.append(cqup_text)
-                #cqup_text = cqup_text.replace('(.*)', '')
-                print("debug tesponline: ", cqup_text)
-
+            if re.search(cqonline, my_line):
+                itmemptylist.append(my_line)
+            else:
+                pass
+        a = len(itmemptylist)
+        if a <= 0:
+            print('TEPS "Waiting for requests" message NOT FOUND')
+        else:
+            print("\n^^^^^BELOW IS CRITICAL^^^^^^^")
+            itmout = itmemptylist.pop(0)
+            itmout = re.sub('\n', '', itmout)
+            hexts = itmout.split(":")
+            hexts0 = hexts[0]
+            hexts0 = re.sub('\(', '', hexts0)
+            hexts0 = re.sub('\.', '', hexts0)
+            hexts0 = re.sub('-.*', '', hexts0)
+            converted_hex = DT.datetime.utcfromtimestamp(float(int(hexts0, 16))/16**4)
+            print("TEPS startup completed at (UTC): ", converted_hex)
+            itmout = re.sub('^.*"\)\s', '', itmout)
+            print(itmout)
+            print("^^^^^ABOVE IS CRITICAL^^^^^^^\n")
 
 def tepsearch():
     with open(cq_raslog, 'r') as reviewraslog:
@@ -177,6 +216,13 @@ def tepsearch():
                 print("debug tepsearch:", my_line)
             else:
                 pass
+
+
+def bssenv(bsslist):
+    itmout = itmemptylist.pop(0)
+    itmout = re.sub('\n', '', itmout)
+    itmout = re.sub('^.*GetEnv"\)\s', '', itmout)
+    print(itmout)
 
 display_menu()
 get_itm6common()

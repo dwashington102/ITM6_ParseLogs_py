@@ -72,8 +72,9 @@ def itmSdate(raslog):
             print("Start Date NOT FOUND")
         else:
             itmout = itmemptylist.pop(0)
+            itmout = re.sub('\n', '', itmout)
             itmout = re.sub('^.*Date:', '', itmout)
-            itmout = re.sub(r'St.*\n', '', itmout)
+            #itmout = re.sub(r'St.*\n', '', itmout)
             print("Start Date: ", itmout)
 
 
@@ -148,7 +149,27 @@ def itmChome(raslog):
             itmout = re.sub('^.*ITM\sHome:\s', '', itmout)
             itmout = re.sub('ITM\sProcess:.*', '', itmout)
             print("CANDLEHOME: ", itmout)
+
+
+def itmnofile(raslog):
+    with open(raslog, 'r') as reviewraslog:
+        itmemptylist = []
+        for my_line in reviewraslog:
+            if re.search(searchNofile, my_line):
+                itmemptylist.append(my_line)
+            else:
+                pass
+        a = len(itmemptylist)
+        if a <= 0:
+            print("ULIMIT NOFILE SETTING NOT FOUND")
+        else:
+            itmout = itmemptylist.pop(0)
+            itmout = re.sub('\n', '', itmout)
+            itmout = re.sub('^.*Nofile\sLimit:\s', '', itmout)
+            itmout = re.sub('Stack\s.*$', '', itmout)
+            print("ulimit nofile setting: ", itmout)
     print("#######################################################\n")
+
 # End of Header Functions
 
 
